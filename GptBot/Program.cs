@@ -5,6 +5,7 @@ using GptBot.Database;
 using GptBot.Discord;
 using GptBot.Gpt;
 using GptBot.UseCase;
+using GptBot.UseCase.ClearHistory;
 using GptBot.UseCase.SubmitPrompt;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,6 +59,7 @@ namespace GptBot
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                 .AddSingleton<DiscordSlashHandler>()
                 .AddSingleton<ISubmitPromptService, SubmitPromptService>()
+                .AddSingleton<IClearHistoryService, ClearHistoryService>()
                 .AddSingleton<IPrompts, CosmosService>()
                 .AddSingleton<IIntelligence, GptService>()
                 .AddSingleton<HttpClient>()

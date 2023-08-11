@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using GptBot.UseCase;
 using GptBot.UseCase.SubmitPrompt;
 using NSubstitute;
 using Xunit;
 
-namespace GptBot.tests.SubmitPrompt;
+namespace GptBotTests.SubmitPrompt;
 
 public class SubmitPromptTest
 {
