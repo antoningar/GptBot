@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using GptBot.UseCase;
 using GptBot.UseCase.SubmitPrompt;
@@ -24,7 +25,7 @@ public class SubmitPromptTest
     private async Task SubmitPrompt_ShouldCheckInput(string username, string prompt)
     {
         SubmitPromptService service = GetSubmitPromptService();
-        await Assert.ThrowsAsync<ArgumentException>(() => service.SubmitPromt(username, prompt));
+        await Assert.ThrowsAsync<ArgumentException>(() => service.SubmitPrompt(username, prompt));
     }
     
     [Fact]
@@ -32,10 +33,10 @@ public class SubmitPromptTest
     {
         IIntelligence intelligence = Substitute.For<IIntelligence>();
         intelligence
-            .Ask(Arg.Any<string>())
-            .Returns("Je ne sais pas");
+            .Ask(Arg.Any<List<Message>>())
+            .Returns(new Message { Content = "Je ne sais pas" });
         SubmitPromptService service = GetSubmitPromptService(intelligence: intelligence);
-        string response = await service.SubmitPromt("username", "okletsgo");
-        Assert.True(!string.IsNullOrWhiteSpace(response));
+        List<Message> response = await service.SubmitPrompt("username", "okletsgo");
+        Assert.True(response.Count > 0);
     }
 }

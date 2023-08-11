@@ -1,7 +1,9 @@
+using GptBot.UseCase.SubmitPrompt;
+
 namespace GptBot.UseCase;
 
 public interface IPrompts
 {
-    Task SavePrompt(string username, string prompt);
-    Task<string> GetConversation(string username);
+    Task SaveConversation(string username, List<Message> conversation);
+    Task<List<Message>?> GetConversation(string username);
 }

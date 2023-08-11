@@ -1,7 +1,11 @@
 ﻿using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using GptBot.Database;
 using GptBot.Discord;
+using GptBot.Gpt;
+using GptBot.UseCase;
+using GptBot.UseCase.SubmitPrompt;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -31,7 +35,7 @@ namespace GptBot
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
 
-            ServiceProvider services = ConfigureServices(configuration, logger);
+            await using ServiceProvider services = ConfigureServices(configuration, logger);
 
             DiscordSocketClient client = services.GetRequiredService<DiscordSocketClient>();
             client.Log += LogAsync;
@@ -53,6 +57,9 @@ namespace GptBot
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                 .AddSingleton<DiscordSlashHandler>()
+                .AddSingleton<ISubmitPromptService, SubmitPromptService>()
+                .AddSingleton<IPrompts, CosmosService>()
+                .AddSingleton<IIntelligence, GptService>()
                 .AddSingleton<HttpClient>()
                 .BuildServiceProvider();
         }
