@@ -1,3 +1,4 @@
+using System.Net;
 using GptBot.UseCase;
 using GptBot.UseCase.SubmitPrompt;
 using Microsoft.Azure.Cosmos;
@@ -41,16 +42,24 @@ public class CosmosService : IPrompts
         try
         {
             _logger.Information("{Class}.{Method}: Saving new messages in Cosmos", nameof(CosmosService), nameof(SaveConversation));
-            ItemResponse<CosmosPrompt> item = await container.ReplaceItemAsync(
+            await container.ReplaceItemAsync(
                 id: username,
                 partitionKey: new PartitionKey(username),
                 item: prompt
             );
-            Console.WriteLine(item.StatusCode);
         }
         catch (CosmosException ex)
         {
-            _logger.Information("{Class}.{Method}: Bad Cosmos response {Response}", nameof(CosmosService), nameof(SaveConversation), ex.ResponseBody);
+            if (ex.StatusCode == HttpStatusCode.NotFound)
+            {
+                _logger.Information("{Class}.{Method}: Old conversation not found, creating an other one", nameof(CosmosService), nameof(SaveConversation));
+                await container.CreateItemAsync(
+                    partitionKey: new PartitionKey(username),
+                    item: prompt
+                );
+            }
+            else
+                _logger.Information("{Class}.{Method}: Bad Cosmos response {Response}", nameof(CosmosService), nameof(SaveConversation), ex.ResponseBody);
         }
         _logger.Information("{Class}.{Method}: messages saved in Cosmos", nameof(CosmosService), nameof(SaveConversation));
     }
@@ -77,11 +86,35 @@ public class CosmosService : IPrompts
         }
         catch (CosmosException ex)
         {
-            _logger.Information("{Class}.{Method}: Bad Cosmos response {Response}", nameof(CosmosService), nameof(GetConversation), ex.ResponseBody);
+            if (ex.StatusCode == HttpStatusCode.NotFound)
+                _logger.Information("{Class}.{Method}: New conversation, history not found", nameof(CosmosService), nameof(GetConversation));
+            else
+                _logger.Information("{Class}.{Method}: Bad Cosmos response {Response}", nameof(CosmosService), nameof(GetConversation), ex.ResponseBody);
         }
 
         _logger.Information("{Class}.{Method}: Queried cosmos DB", nameof(CosmosService), nameof(GetConversation));
         return conversation;
+    }
+
+    public async Task ClearConversation(string username)
+    {
+        using CosmosClient client = new(
+            accountEndpoint: _configuration.GetSection(COSMOSENDPOINT_KEY).Value,
+            authKeyOrResourceToken: _configuration.GetSection(COSMOSKEY_KEY).Value
+        );
+
+        Container container = GetContainer(client);
+        
+        _logger.Information("{Class}.{Method}: Querying cosmos DB for delete", nameof(CosmosService), nameof(ClearConversation));
+        try
+        {
+            await container.DeleteItemAsync<CosmosPrompt>(id: username, partitionKey: new PartitionKey(username));
+        }
+        catch (CosmosException ex)
+        {
+            _logger.Information("{Class}.{Method}: Bad Cosmos response {Response}", nameof(CosmosService), nameof(ClearConversation), ex.ResponseBody);
+        }
+        _logger.Information("{Class}.{Method}: Cosmos DB deleted queries ended", nameof(CosmosService), nameof(ClearConversation));
     }
 
     private Container GetContainer(CosmosClient client)

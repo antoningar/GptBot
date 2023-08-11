@@ -1,4 +1,5 @@
 using Discord.Interactions;
+using GptBot.UseCase.ClearHistory;
 using GptBot.UseCase.SubmitPrompt;
 
 namespace GptBot.Discord;
@@ -6,10 +7,12 @@ namespace GptBot.Discord;
 public class DiscordSlashModule : InteractionModuleBase<SocketInteractionContext>
 {
     private readonly ISubmitPromptService _promptService;
+    private readonly IClearHistoryService _clearHistoryService;
 
-    public DiscordSlashModule(ISubmitPromptService promptService)
+    public DiscordSlashModule(ISubmitPromptService promptService, IClearHistoryService clearHistoryService)
     {
         _promptService = promptService;
+        _clearHistoryService = clearHistoryService;
     }
 
     [SlashCommand("gpt-submit-prompt", "Submit your promt")]
@@ -31,6 +34,8 @@ public class DiscordSlashModule : InteractionModuleBase<SocketInteractionContext
     [SlashCommand("gpt-clear-history", "Clear your session")]
     public async Task Clear()
     {
+        string username = Context.User.Username;
+        await _clearHistoryService.Clearhistory(username);
         await RespondAsync("Cleared");
     }
 }
