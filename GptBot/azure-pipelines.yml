@@ -2,6 +2,7 @@ trigger:
   - master
   - dev
   - feat/*
+  - feature/*
 
 pool:
   vmImage: ubuntu-latest
@@ -17,7 +18,7 @@ steps:
       command: 'restore'
       restoreSolution: '**/*.sln'
       feedsToUse: 'select'
-
+          
   - task: DotNetCoreCLI@2
     inputs:
       command: 'build'
