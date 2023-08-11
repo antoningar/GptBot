@@ -71,14 +71,5 @@ namespace GptBot
             Log.Information("{Log}", log.ToString());
             return Task.CompletedTask;
         }
-
-        public static bool IsDebug()
-        {
-            #if DEBUG
-                return true;
-            #else
-                return false;
-            #endif
-        }
     }
 }

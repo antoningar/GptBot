@@ -3,6 +3,7 @@ using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 
 namespace GptBot.Discord;
 
@@ -15,12 +16,16 @@ public class DiscordSlashHandler
     private readonly IServiceProvider _service;
     private readonly IConfiguration _configuration;
 
-    public DiscordSlashHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider service, IConfiguration configuration)
+    private readonly ILogger _logger;
+
+    public DiscordSlashHandler(DiscordSocketClient client, InteractionService handler, IServiceProvider service, IConfiguration configuration, ILogger logger)
     {
         _client = client;
         _handler = handler;
         _service = service;
         _configuration = configuration;
+
+        _logger = logger;
     }
 
     public async Task InitializeAsync()
@@ -46,10 +51,17 @@ public class DiscordSlashHandler
 
     private async Task ReadyAsync()
     {
-        if (Program.IsDebug())
+        _logger.Information("{Class}.{Method}: Bot ready", nameof(DiscordSlashHandler), nameof(ReadyAsync));
+        if (_configuration.GetSection("MODE").Value == "Debug")
+        {
+            _logger.Debug("{Class}.{Method}: Program is debug", nameof(DiscordSlashHandler), nameof(ReadyAsync));
             await _handler.RegisterCommandsToGuildAsync(
                 Convert.ToUInt64(_configuration.GetSection(GUILD_UUID_KEY).Value));
+        }
         else
+        {
             await _handler.RegisterCommandsGloballyAsync();
+            _logger.Debug("{Class}.{Method}: Program is not debug", nameof(DiscordSlashHandler), nameof(ReadyAsync));            
+        }
     }
 }
