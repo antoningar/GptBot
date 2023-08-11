@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GptBot", "GptBot\GptBot.csproj", "{F2D56651-140E-4D4F-B548-17E98ACAB8FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GptBot.tests", "GptBot.tests\GptBot.tests.csproj", "{04EAC4A5-35A4-4CE5-A30C-78259A9BD7FA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GptBotTests", "GptBotTests\GptBotTests.csproj", "{04EAC4A5-35A4-4CE5-A30C-78259A9BD7FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
